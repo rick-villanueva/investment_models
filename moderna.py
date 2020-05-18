@@ -1,9 +1,12 @@
-
+#Import libraries
 import datetime as dt
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
-from matplotlib import style
+import mplfinance as mpf
 import pandas as pd
 import pandas_datareader.data as web
+from matplotlib import style
+from mpl_finance import candlestick_ohlc
 
 style.use('fivethirtyeight')
 
@@ -18,31 +21,27 @@ df.to_csv('/Users/rickvillanueva/Documents/VIG/Models/moderna.csv')
 
 #Import the created csv file
 moderna_data = pd.read_csv('moderna.csv')
-moderna_data = pd.read_csv('moderna.csv', parse_dates = True, index_col = 0)
+moderna_data = pd.read_csv('moderna.csv', parse_dates = False, index_col = 0)
 
 #Check the behavior of the file
-plt.head(moderna_data)
+print(moderna_data.head())
+moderna_data.info()
 
-#Graph
+#Graph (from the dataframe and not the csv)
 df.plot() #Add the columns to graph
 plt.show()
-
-# Si quisieramos graficar solo una o varias columnas
+plt.clf()
+#Graph certain columns (from the dataframe and not the csv)
 df['Open'].plot()
 plt.show()
+plt.clf()
 
 df[['Low', 'High']].plot()
 plt.show()
+plt.clf()
 
-"""
-Ejercicio 3:
 
-    Manipulación básica de datos de los datos de stock.
-
-"""
-
-# Crear una columna para medias móviles:
-
+#Creating a column for mean
 df['100ma'] = df['Adj Close'].rolling(window = 100).mean()
 
 ax1 = plt.subplot2grid((6, 1), (0, 0), rowspan = 5, colspan = 1)
@@ -53,27 +52,22 @@ ax1.plot(df.index, df['100ma'])
 ax2.bar(df.index, df['Volume'])
 
 plt.show()
+plt.clf()
 
-# Dibujar un OHLC (Open-High-Low-Close Chart)
-
+#Graph (Open-High-Low-Close Chart)
 df_ohlc = df['Adj Close'].resample('10D').ohlc()
 df_volume = df['Volume'].resample('10D').sum()
 
-print(df_ohlc.head()) # veamos como queda la serie y el dataframe
+print(df_ohlc.head())
 
-# reindexar el dataframe:
+#Reindex dataframe 
 df_ohlc.reset_index(inplace = True)
-print(df_ohlc.head()) # veamos la diferencia en la numeración a la izquierda del DF con la reindexación
+print(df_ohlc.head())
 
-# hay que importar nuevas bibliotecas:
-import matplotlib.dates as mdates
-
-# convertir las fechas a números
+#Convert date to number
 df_ohlc['Date'] = df_ohlc['Date'].map(mdates.date2num)
-print(df_ohlc.head()) # veamos la diferencia en la columna fecha, ahora sale como un número secuencial
+print(df_ohlc.head())
 
-# el módulo finance de matplotlib ya fue depreciado, en la consola hay que instalar: pip install mpl_finance
-from mpl_finance import candlestick_ohlc
 
 ax1 = plt.subplot2grid((6, 1), (0, 0), rowspan = 5, colspan = 1)
 ax2 = plt.subplot2grid((6, 1), (5, 0), rowspan = 1, colspan = 1, sharex = ax1)
